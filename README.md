@@ -78,7 +78,7 @@ One cluster will run the Selenium Grid, and the other will run a sample applicat
 
 ```bash
 az deployment sub create -u https://github.com/Azure/AKS-Construction/releases/download/0.9.12/samples-peered-vnet.json -l WestEurope -p adminPrincipalId=$(az ad signed-in-user show --query objectId --out tsv)
-az aks get-credentials -n aks-grid-stest -g rg-stest-selenium --overwrite-existing
+az aks get-credentials -n aks-grid-stest -g rg-stest-selenium --overwrite-existing --admin
 ```
 
 #### Keda
@@ -127,6 +127,7 @@ The next step is to package your newly edited files into a helm chart that you c
 # Set some variables to use in the following commands
 
 ACRNAME="your ACR name"
+ACRFQDN="Your ACR URL"
 USER_NAME="00000000-0000-0000-0000-000000000000" #This can be left as the default
 PASSWORD=$(az acr login --name $ACRNAME --expose-token --output tsv --query accessToken) #This can be left as the default
 
@@ -140,11 +141,11 @@ az acr login --name $ACRNAME
 
 #Log in to your registry with HELM
 
-helm registry login $ACRNAME --username $USER_NAME --password $PASSWORD
+helm registry login $ACRFQDN --username $USER_NAME --password $PASSWORD
 
 #Push your edited helm chart to your container registry. Please note: the zipped file will have been generated from your helm package in the above step.
 
-helm push selenium-grid-0.15.4.tgz oci://$ACRNAME/helm
+helm push selenium-grid-0.15.4.tgz oci://$ACRFQDN/helm
 
 #Attach your ACR to your AKS cluster to allow AKS to pull the image.
 
@@ -160,7 +161,6 @@ edgeReplicas=0
 helm upgrade --install selenium-grid charts/selenium-grid/. --set hub.serviceType=LoadBalancer,chromeNode.replicas=$chromeReplicas,firefoxNode.replicas=$firefoxReplicas,edgeNode.replicas=$edgeReplicas,chromeNode.nodeSelector.selbrowser=chromepool,firefoxNode.nodeSelector.selbrowser=firefoxpool,edgeNode.nodeSelector.selbrowser=edgepool
 
 # Optional: If you are using your own container registry with the edited helm charts run the following command which points to your Azure Container Registry instead.
-
 helm install selenium-grid oci://$ACRNAME/helm/selenium-grid --version 0.15.1 --set hub.serviceType=LoadBalancer,chromeNode.replicas=$chromeReplicas,firefoxNode.replicas=$firefoxReplicas,edgeNode.replicas=$edgeReplicas,chromeNode.nodeSelector.selbrowser=chromepool,firefoxNode.nodeSelector.selbrowser=firefoxpool,edgeNode.nodeSelector.selbrowser=edgepool
 ```
 
