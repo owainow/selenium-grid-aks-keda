@@ -77,7 +77,7 @@ Using [AKS Construction](https://github.com/Azure/Aks-Construction), we can quic
 One cluster will run the Selenium Grid, and the other will run a sample application.
 
 ```bash
-az deployment sub create -u https://github.com/Azure/AKS-Construction/releases/download/0.9.12/samples-peered-vnet.json -l WestEurope -p adminPrincipalId=$(az ad signed-in-user show --query objectId --out tsv)
+az deployment sub create -u https://github.com/Azure/AKS-Construction/releases/download/0.9.12/samples-peered-vnet.json -l WestEurope -p adminPrincipalId=$(az ad signed-in-user show --query id --out tsv)
 az aks get-credentials -n aks-grid-stest -g rg-stest-selenium --overwrite-existing --admin
 ```
 
